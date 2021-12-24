@@ -1,14 +1,24 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
+import { fstat, open } from 'fs';
+import { openStdin } from 'process';
+import { TextEncoder } from 'util';
 import * as vscode from 'vscode';
 
 export function openFile(path: string) {
 	let fileUri: vscode.Uri = vscode.Uri.parse(path);
 
-	vscode.workspace.openTextDocument(fileUri)
-		.then((document: vscode.TextDocument) => {
-			vscode.window.showTextDocument(document);
-		});
+	try {
+		vscode.workspace.fs.stat(fileUri)
+		vscode.workspace.fs.writeFile(fileUri, new TextEncoder().encode(""));
+	} catch {
+		vscode.workspace.openTextDocument(fileUri)
+			.then((document: vscode.TextDocument) => {
+				vscode.window.showTextDocument(document);
+			});
+	}
+
+
 }
 
 // this method is called when your extension is activated
@@ -25,7 +35,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let findElixirTestFile = vscode.commands.registerCommand('elixir-pro.gotoElixirTest', () => {
 		let filename = vscode.window.activeTextEditor?.document.fileName;
 
-		if (filename != undefined) {
+		if (filename !== undefined) {
 			let testFilename: string = filename.replace(/lib\//, "test/").replace(/\.ex/, "_test.exs");
 
 			openFile(testFilename);
